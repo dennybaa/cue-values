@@ -28,7 +28,6 @@ jobs:
         if: steps.changed-apps.outputs.any_changed == 'true'
         env:
           CHANGED_APP_FILES: ${{ steps.changed-apps.outputs.all_changed_files }}
-          TERM: xterm-256color
         run: |
           ## get apps
           echo -e "${CHANGED_APP_FILES// /$'\n'}" | sed -E s@${CONF_DIR%%/*}'/([^/]*).*@\1@' | uniq | while read app; do
@@ -40,7 +39,7 @@ jobs:
           done
 
           ## show changes
-          wget -qO /tmp/bat.deb https://github.com/sharkdp/bat/releases/download/v0.24.0/bat_0.24.0_amd64.deb
-          sudo dpkg -i /tmp/bat.deb > /dev/null && rm -f /tmp/bat.deb &>/dev/null
+          wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
+          sudo dpkg -i /tmp/delta.deb > /dev/null && rm -f delta.deb &>/dev/null
           git add $VALUES_DIR
-          git diff HEAD -- $VALUES_DIR | bat --theme=GitHub
+          git diff HEAD -- $VALUES_DIR | delta -n --diff-so-fancy
