@@ -1,0 +1,30 @@
+name: Build Helm values
+on: pull_request
+
+env:
+  envs:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      -
+        name: Get changed apps
+        id: changed-apps
+        uses: tj-actions/changed-files@v41
+        with:
+          files:
+            config/*/
+      -
+        name: Build
+        if: ${{ steps.changed-files.outputs.only_changed }}
+        env:
+          ALL_CHANGED: ${{ steps.changed-files.outputs.all_changed_files }}
+        run: |
+          for file in "$ALL_CHANGED"; do
+            echo "$file was changed"
+          done
