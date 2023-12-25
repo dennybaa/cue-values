@@ -49,11 +49,12 @@ jobs:
 
           git add $VALUES_DIR
           git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
-          valuesChanged=$(git diff --name-only HEAD^ -- $VALUES_DIR)
-          echo "valuesChanged='$valuesChanged'" >> "$GITHUB_ENV"
-      -
-        run: |
-          echo "${{ env.valuesChanged }}"
+          valuesChanged="$(git diff --name-only HEAD^ -- $VALUES_DIR)"
+          echo "valuesChanged='$valuesChanged'" 
+          #>> "$GITHUB_ENV"
+      # -
+      #   run: |
+      #     echo "${{ env.valuesChanged }}"
 
   # commit:
   #   name: Commit Changes
