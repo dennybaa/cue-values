@@ -42,6 +42,7 @@ jobs:
 
       -
         name: Show Changes
+        id: values
         run: |
           ## get delta
           wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
@@ -49,12 +50,12 @@ jobs:
 
           git add $VALUES_DIR
           git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
-          valuesChanged="$(git diff --name-only HEAD^ -- $VALUES_DIR | tr '\n' ' ')"
-          echo "valuesChanged='$valuesChanged'"
-          #>> "$GITHUB_ENV"
-      # -
-      #   run: |
-      #     echo "${{ env.valuesChanged }}"
+
+          read -r valuesChanged "$(git diff --name-only HEAD^ -- $VALUES_DIR | tr '\n' ' ')"
+          echo "changed_files='${valuesChanged% }'" >> "$GITHUB_OUTPUT"
+      -
+        run: |
+          echo "${{ steps.values.outputs.changed_files }}"
 
   # commit:
   #   name: Commit Changes
