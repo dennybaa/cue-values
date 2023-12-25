@@ -1,5 +1,7 @@
 name: Update Helm values
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
 
 env:
   STAGES: "dev prod"
