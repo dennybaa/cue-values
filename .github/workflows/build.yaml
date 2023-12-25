@@ -10,8 +10,11 @@ jobs:
   build:
     name: Update values
     runs-on: ubuntu-latest
+    outputs:
+      values_changed: ${{ steps.values.outputs.values_changed }}
+
     steps:
-      - 
+      -
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -38,28 +41,57 @@ jobs:
               cue cmd -t env=$stage -t app=$app update-values
             done
           done
-
-
       -
         name: Show Changes
         id: values
         run: |
-          ## get delta
-          wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
-          sudo dpkg -i /tmp/delta.deb > /dev/null && rm -f delta.deb &>/dev/null
-
           git add $VALUES_DIR
-          git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
+          valuesChanged=false
+          [ "$( git diff --name-only HEAD^ -- $VALUES_DIR | wc -l)" -eq 0 ] || valuesChanged=true
+          echo -n "✔ "; echo "values_changed=${valuesChanged}" | tee "$GITHUB_OUTPUT"
 
-          valuesChanged="$(git diff --name-only HEAD^ -- $VALUES_DIR | tr '\n' ' ')"
-          echo "changed_files='${valuesChanged% }'" >> "$GITHUB_OUTPUT"
+          if [ $valuesChanged = "true" ]; then
+            # get delta
+            pkgurl="https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb"
+            wget -qO /tmp/delta.deb "$pkgurl" && sudo dpkg -i /tmp/delta.deb > /dev/null
+            rm -f delta.deb &> /dev/null
+
+            # show diff
+            git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
+          fi
       -
-        run: |
-          echo "${{ steps.values.outputs.changed_files }}"
+        uses: actions/upload-artifact@v4
+        if: steps.values.outputs.values_changed
+        with:
+          name: changed-values
+          path: ${{ env.VALUES_DIR }}
 
-  # commit:
-  #   name: Commit Changes
-  #   runs-on: ubuntu-latest
-  #   if: github.event.pull_request.merged == true && github.event.type == 'closed'
-  #   steps:
+  commit:
+    name: Commit changes
+    runs-on: ubuntu-latest
+    needs: build
 
+    if: |
+      needs.build.outputs.values_changed &&
+      github.event.pull_request.merged &&
+      github.event.type == 'closed'
+
+    permissions:
+      contents: write
+
+    steps:
+      -
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      -
+        uses: actions/download-artifact@v4
+        with:
+          name: changed-values
+      -
+        name: Add and commit updated values
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: ${{ env.VALUES_DIR }}
+          message: 'auto committed values'
+          commit: --signoff
