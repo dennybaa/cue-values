@@ -17,6 +17,8 @@ InitVersion: {
 }
 
 Values: {
+    app: name: "test-app"
+
     image: {
         registry: "ghcr.io"
         repository: "dennybaa/test-app"
