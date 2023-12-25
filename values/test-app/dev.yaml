@@ -1,0 +1,16 @@
+image:
+  registry: ghcr.io
+  repository: dennybaa/test-app
+service:
+  ports:
+    http: 3000
+ingress:
+  enabled: true
+  hostname: test-app.dev.kube.local
+resources:
+  limits:
+    cpu: 100m
+    memory: 64Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
