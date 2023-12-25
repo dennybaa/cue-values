@@ -45,6 +45,6 @@ jobs:
           # git diff HEAD -- $VALUES_DIR
       - 
         name: Changed Values
-        uses: GrantBirki/git-diff-action@vX.X.X
+        uses: GrantBirki/git-diff-action@v2.4.0
         with:
           search_path: ${{ env.VALUES_DIR }}
