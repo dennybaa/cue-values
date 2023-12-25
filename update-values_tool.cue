@@ -3,52 +3,79 @@ package main
 import (
     "this.sh/config"
     "path"
-    "encoding/yaml"
+    // "strings"
+    // "encoding/yaml"
     "tool/exec"
     "tool/file"
     "tool/cli"
 )
 
 command: "update-values": {
-
     // required inputs
     env: config.#Env @tag(env,short)
-    tag: string      @tag(tag)
     app: string      @tag(app)
 
-    cueEval: exec.Run & {
-        dir: "config/\(app)"
-        cmd: [
-            "cue", "export", "--out=yaml", "-t", "\(env)",
-            "-t", "env=\(env)",
-            "-t", "tag=\(tag)",
-        ]
-        stdout: string
-    }
+    valuesDir: path.Resolve("values", app, path.Unix)
+    versionFile: path.Join([valuesDir, "\(env).version.yaml"], path.Unix)
 
-    values: yaml.Unmarshal(cueEval.stdout).Values
-    appDir: path.Resolve("values", app, path.Unix)
+    cueExport: [
+        "cue", "export", "--out=yaml", "-t", "\(env)",
+        "-t", "env=\(env)"
+    ]
 
-    // Create clusters/{dest} directory
+    // Create values/{app} directory
     mkDir: file.Mkdir & {
-        $dep: cueEval.$done
-        path: appDir
+        path: valuesDir
         createParents: true
     }
 
-    writeValues: {
-        stage: {
-            valuesFile: path.Join([appDir, "\(env).yaml"], path.Unix)
+    // Generate values via CUE
+    genValues: exec.Run & {
+        $dep: mkDir.$done
+        cmd: cueExport + ["-e", "Values"]
+        dir: "config/\(app)"
+        stdout: string
+    }
 
-            info: cli.Print & {
-                text: "Updating \(app) (at \(valuesFile)) (env=\(env) tag=\(tag))..."
+    // Check if version file exists
+    noVersionFile: exec.Run & {
+        $dep: mkDir.$done
+        cmd: ["sh", "-c", "[ ! -f '\(versionFile)' ] >/dev/null 2>&1"]
+        mustSucceed: false
+    }
+
+    if noVersionFile.success != _|_ {
+        if noVersionFile.success {
+            infoVersion: cli.Print & {
+                $dep: writeVersion.$done
+                text: "✔ [\(app)] Created version file \(versionFile)"
             }
 
-            write: file.Create & {
-                $dep: mkDir.$done
-                filename: valuesFile
-                contents: yaml.Marshal(values)
-            }  
+            initVersion: exec.Run & {
+                cmd: cueExport + ["-e", "InitVersion"]
+                dir: "config/\(app)"
+                stdout: string
+            }
+
+            writeVersion: file.Create & {
+                filename: versionFile
+                contents: initVersion.stdout
+            }
+        }
+    }
+
+    writeValues: {
+        valuesFile: path.Join([valuesDir, "\(env).yaml"], path.Unix)
+
+        infoValues: cli.Print & {
+            $dep: writeValues.$done
+            text: "✔ [\(app)] Updated \(valuesFile)"
+        }
+
+        writeValues: file.Create & {
+            $dep: genValues.$done
+            filename: valuesFile
+            contents: genValues.stdout
         }
     }
 }

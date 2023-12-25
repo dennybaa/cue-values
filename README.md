@@ -15,8 +15,15 @@ Structure:
 
 The command to generate values:
 
-```
-cue cmd -t env=dev -t tag=v0.1.0 -t app=test-app update-values
+```shell
+cue cmd -t env=dev -t app=test-app update-values
 ```
 
-it will write `values/test-app/dev.yaml` file.
+You will get the similar output as bellow:
+
+```
+✔ [test-app] Updated values/test-app/dev.yaml
+✔ [test-app] Created version file values/test-app/dev.version.yaml
+```
+
+**Note that** the values configuration is split into two files. The later file ([dev.version.yaml](values/test-app/dev.version.yaml)) is created only once, to provide the versions structure for an application (technically there can be several version tags for a complex app). The version file is intentionally separated to allow means for the direct editing (either manual or possibly editing by a CI system).
