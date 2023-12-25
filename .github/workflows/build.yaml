@@ -28,7 +28,7 @@ jobs:
         if: steps.changed-apps.outputs.any_changed == 'true'
         env:
           CHANGED_APP_FILES: ${{ steps.changed-apps.outputs.all_changed_files }}
-          TERM: xterm
+          TERM: xterm-256color
         run: |
           ## get apps
           echo -e "${CHANGED_APP_FILES// /$'\n'}" | sed -E s@${CONF_DIR%%/*}'/([^/]*).*@\1@' | uniq | while read app; do
