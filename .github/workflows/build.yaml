@@ -40,6 +40,11 @@ jobs:
 
           ## show changes
           git add $VALUES_DIR
-          echo "==================================================="
-          echo -e "=> Show changes\n"
-          git diff HEAD -- $VALUES_DIR
+          # echo "==================================================="
+          # echo -e "=> Show changes\n"
+          # git diff HEAD -- $VALUES_DIR
+      - 
+        name: Changed Values
+        uses: GrantBirki/git-diff-action@vX.X.X
+        with:
+          search_path: ${{ env.VALUES_DIR }}
