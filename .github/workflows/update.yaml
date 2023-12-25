@@ -48,11 +48,11 @@ jobs:
         id: values
         run: |
           git add $VALUES_DIR
-          valuesChanged=false
-          [ "$( git diff --name-only HEAD^ -- $VALUES_DIR | wc -l)" -eq 0 ] || valuesChanged=true
+          valuesChanged=no
+          [ "$( git diff --name-only HEAD^ -- $VALUES_DIR | wc -l)" -eq 0 ] || valuesChanged=yes
           echo -n "✔ "; echo "values_changed=${valuesChanged}" | tee "$GITHUB_OUTPUT"
 
-          if [ $valuesChanged = "true" ]; then
+          if [ $valuesChanged = "yes" ]; then
             # get delta
             pkgurl="https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb"
             wget -qO /tmp/delta.deb "$pkgurl" && sudo dpkg -i /tmp/delta.deb > /dev/null
@@ -63,7 +63,8 @@ jobs:
           fi
       -
         uses: actions/upload-artifact@v4
-        if: steps.values.outputs.values_changed
+        ## Note: use yes (string) not to avoid confusion with true/'true'.
+        if: steps.values.outputs.values_changed == 'yes'
         with:
           name: changed-values
           path: ${{ env.VALUES_DIR }}
@@ -74,9 +75,9 @@ jobs:
     needs: build
 
     if: |
-      needs.build.outputs.values_changed &&
-      github.event.pull_request.merged &&
-      github.event.type == 'closed'
+      needs.build.outputs.values_changed == 'yes' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true
 
     permissions:
       contents: write
@@ -90,6 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: changed-values
+          path: ${{ env.VALUES_DIR }}
       -
         name: Add and commit updated values
         uses: EndBug/add-and-commit@v9
