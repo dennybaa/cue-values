@@ -42,4 +42,4 @@ jobs:
           wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
           sudo dpkg -i /tmp/delta.deb > /dev/null
           git add $VALUES_DIR
-          git diff HEAD -- $VALUES_DIR | delta -n
+          git diff HEAD -- $VALUES_DIR | delta -n --true-color=always
