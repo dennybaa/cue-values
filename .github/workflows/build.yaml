@@ -1,11 +1,14 @@
-name: Build Helm values
+name: Update Helm values
 on: pull_request
 
 env:
-  envs:
+  STAGES: "dev prod"
+  CONF_DIR: "config/"
+  VALUES_DIR: "values/"
 
 jobs:
   build:
+    name: Update values
     runs-on: ubuntu-latest
     steps:
       - 
@@ -17,14 +20,46 @@ jobs:
         id: changed-apps
         uses: tj-actions/changed-files@v41
         with:
-          files:
-            config/*/
+          files: |
+            config/*/*.*
+            config/**/*.*
+      - uses: cue-lang/setup-cue@v1.0.0
       -
         name: Build
-        if: ${{ steps.changed-files.outputs.only_changed }}
+        if: steps.changed-apps.outputs.any_changed == 'true'
         env:
-          ALL_CHANGED: ${{ steps.changed-files.outputs.all_changed_files }}
+          CHANGED_APP_FILES: ${{ steps.changed-apps.outputs.all_changed_files }}
         run: |
-          for file in "$ALL_CHANGED"; do
-            echo "$file was changed"
+          ## get apps
+          echo -e "${CHANGED_APP_FILES// /$'\n'}" | sed -E s@${CONF_DIR%%/*}'/([^/]*).*@\1@' | uniq | while read app; do
+
+            ## update values
+            for stage in $STAGES; do
+              cue cmd -t env=$stage -t app=$app update-values
+            done
           done
+
+
+      -
+        name: Show Changes
+        id: values
+        run: |
+          ## get delta
+          wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
+          sudo dpkg -i /tmp/delta.deb > /dev/null && rm -f delta.deb &>/dev/null
+
+          git add $VALUES_DIR
+          git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
+
+          valuesChanged="$(git diff --name-only HEAD^ -- $VALUES_DIR | tr '\n' ' ')"
+          echo "changed_files='${valuesChanged% }'" >> "$GITHUB_OUTPUT"
+      -
+        run: |
+          echo "${{ steps.values.outputs.changed_files }}"
+
+  # commit:
+  #   name: Commit Changes
+  #   runs-on: ubuntu-latest
+  #   if: github.event.pull_request.merged == true && github.event.type == 'closed'
+  #   steps:
+
