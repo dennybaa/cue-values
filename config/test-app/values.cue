@@ -28,7 +28,7 @@ Values: {
 
     ingress: {
         enabled: true
-        // DRY value example
+        // DRY value example (the default app hostname)
         hostname: *"test-app.\(cf.domains.default)" | string
     }
 
