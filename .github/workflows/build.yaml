@@ -43,10 +43,8 @@ jobs:
         name: Show Changes
         run: |
           ## get delta
-          git log
-          git diff HEAD^
-          # wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
-          # sudo dpkg -i /tmp/delta.deb > /dev/null && rm -f delta.deb &>/dev/null
+          wget -qO /tmp/delta.deb https://github.com/dandavison/delta/releases/download/0.16.5/git-delta_0.16.5_amd64.deb
+          sudo dpkg -i /tmp/delta.deb > /dev/null && rm -f delta.deb &>/dev/null
 
-          # git add $VALUES_DIR
-          # git diff HEAD~3 -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
+          git add $VALUES_DIR
+          git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
