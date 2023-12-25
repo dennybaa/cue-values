@@ -51,8 +51,7 @@ jobs:
           git add $VALUES_DIR
           git diff HEAD^ -- $VALUES_DIR | delta --syntax-theme=GitHub -n --diff-so-fancy
 
-          set -x
-          read -r valuesChanged "$(git diff --name-only HEAD^ -- $VALUES_DIR | tr '\n' ' ')"
+          valuesChanged="$(git diff --name-only HEAD^ -- $VALUES_DIR | tr '\n' ' ')"
           echo "changed_files="${valuesChanged% }'" >> "$GITHUB_OUTPUT"
       -
         run: |
