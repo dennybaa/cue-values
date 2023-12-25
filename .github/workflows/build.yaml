@@ -2,7 +2,9 @@ name: Build Helm values
 on: pull_request
 
 env:
-  envs:
+  STAGES: "dev prod"
+  CONF_DIR: "config/"
+  VALUES_DIR: "values/"
 
 jobs:
   build:
@@ -17,14 +19,27 @@ jobs:
         id: changed-apps
         uses: tj-actions/changed-files@v41
         with:
-          files:
-            config/*/
+          files: |
+            config/*/*.*
+            config/**/*.*
+      - uses: cue-lang/setup-cue@v1.0.0
       -
         name: Build
-        if: ${{ steps.changed-files.outputs.only_changed }}
+        if: steps.changed-apps.outputs.any_changed == 'true'
         env:
-          ALL_CHANGED: ${{ steps.changed-files.outputs.all_changed_files }}
+          CHANGED_APP_FILES: ${{ steps.changed-apps.outputs.all_changed_files }}
         run: |
-          for file in "$ALL_CHANGED"; do
-            echo "$file was changed"
+          ## get apps
+          echo -e "${CHANGED_APP_FILES// /$'\n'}" | sed -E s@${CONF_DIR%%/*}'/([^/]*).*@\1@' | uniq | while read app; do
+
+            ## update values
+            for stage in $STAGES; do
+              cue cmd -t env=$stage -t app=$app update-values
+            done
           done
+
+          ## show changes
+          git add $VALUES_DIR
+          echo "==================================================="
+          echo -e "=> Show changes\n"
+          git diff HEAD -- $VALUES_DIR
