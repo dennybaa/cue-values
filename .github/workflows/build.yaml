@@ -39,7 +39,7 @@ jobs:
           done
 
           ## show changes
-          wget -qO /tmp/bat.deb https://github.com/sharkdp/bat/releases/download/v0.24.0/bat_0.24.0_amd64.deb
-          sudo dpkg -i /tmp/bat.deb > /dev/null
-          git add $VALUES_DIR
-          git diff HEAD -- $VALUES_DIR | bat
+          # wget -qO /tmp/bat.deb https://github.com/sharkdp/bat/releases/download/v0.24.0/bat_0.24.0_amd64.deb
+          # sudo dpkg -i /tmp/bat.deb > /dev/null
+          # git add $VALUES_DIR
+          # git diff HEAD -- $VALUES_DIR | bat
