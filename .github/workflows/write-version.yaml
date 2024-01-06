@@ -1,0 +1,32 @@
+name: Write image version
+on:
+  workflow_dispatch:
+    branches:
+      - main
+
+    inputs:
+      yqEval:
+        description: Specifies yq eval body
+        required: true
+      basePath:
+        description: Specifies the base path to version file (test-app/dev translates to values/test-app/dev.version.yaml)
+        required: true
+
+jobs:
+  set-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set image version
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            yq eval -n '${{ github.events.inputs.yqEval }}' > values/${{ github.events.inputs.basePath }}.version.yaml
+
+      - name: Commit image changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Apply version file update
