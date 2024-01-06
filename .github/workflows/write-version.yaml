@@ -28,7 +28,7 @@ jobs:
         uses: mikefarah/yq@master
         with:
           cmd: |
-            yq eval -n '${{ github.events.inputs.yqEval }}' > values/${{ github.events.inputs.basePath }}.version.yaml
+            yq eval -n '${{ inputs.yqEval }}' > values/${{ inputs.basePath }}.version.yaml
 
       - name: Commit image changes
         uses: stefanzweifel/git-auto-commit-action@v4
