@@ -13,8 +13,12 @@ on:
         required: true
 
 jobs:
-  set-version:
+  write-version:
+    name: Update version file
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
         with:
