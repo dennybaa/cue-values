@@ -30,7 +30,9 @@ jobs:
           cmd: |
             yq eval -n '${{ inputs.yqEval }}' > values/${{ inputs.basePath }}.version.yaml
 
-      - name: Commit image changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+      -
+        name: Commit updated version file
+        uses: EndBug/add-and-commit@v9
         with:
-          commit_message: Apply version file update
+          message: 'auto committed version'
+          commit: --signoff
