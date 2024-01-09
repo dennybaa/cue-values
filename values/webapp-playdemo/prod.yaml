@@ -1,14 +1,14 @@
 app:
-  name: test-app
+  name: webapp-playdemo
 image:
-  registry: ghcr.io
-  repository: dennybaa/test-app
+  registry: c8n.io
+  repository: dennybaa/webapp-playdemo
 service:
   ports:
     http: 3000
 ingress:
   enabled: true
-  hostname: test-app.prod.kube.local
+  hostname: webapp-playdemo.prod.kube.local
 resources:
   requests:
     cpu: 100m
