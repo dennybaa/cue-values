@@ -17,11 +17,11 @@ InitVersion: {
 }
 
 Values: {
-    app: name: "test-app"
+    app: name: "webapp-playdemo"
 
     image: {
-        registry: "ghcr.io"
-        repository: "dennybaa/test-app"
+        registry: "c8n.io"
+        repository: "dennybaa/webapp-playdemo"
     }
 
     service: ports: {
@@ -31,7 +31,7 @@ Values: {
     ingress: {
         enabled: true
         // DRY value example (the default app hostname)
-        hostname: *"test-app.\(cf.domains.default)" | string
+        hostname: *"webapp-playdemo.\(cf.domains.default)" | string
     }
 
     resources: limits: resources.requests
