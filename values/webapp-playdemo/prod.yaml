@@ -1,14 +1,6 @@
 app:
   name: webapp-playdemo
-image:
-  registry: c8n.io
-  repository: dennybaa/webapp-playdemo
-service:
-  ports:
-    http: 3000
-ingress:
-  enabled: true
-  hostname: webapp-playdemo.prod.kube.local
+replicaCount: 1
 resources:
   requests:
     cpu: 100m
@@ -16,3 +8,42 @@ resources:
   limits:
     cpu: 100m
     memory: 128Mi
+podAntiAffinityPreset: soft
+pdb:
+  create: true
+  minAvailable: 2
+  maxUnavailable: 20%
+image:
+  registry: c8n.io
+  repository: dennybaa/webapp-playdemo
+containerPorts:
+  http: 3000
+service:
+  ports:
+    http:
+      port: 3000
+      targetPort: http
+ingress:
+  enabled: true
+  hostname: webapp.prod.k8s.local
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPU: 80
+  behavior:
+    scaleDown:
+      selectPolicy: Min
+      policies:
+        - type: Percent
+          value: 20
+          periodSeconds: 60
+        - type: Pods
+          value: 2
+          periodSeconds: 60
+  targetMemory: 70
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /
+    port: http
