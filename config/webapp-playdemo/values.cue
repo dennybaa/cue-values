@@ -1,4 +1,4 @@
-package testapp
+package values
 import (
     "this.sh/config"
 )
@@ -18,25 +18,37 @@ InitVersion: {
 
 Values: {
     app: name: "webapp-playdemo"
+    replicaCount: *1 | int & >0 | null
+    podAntiAffinityPreset: *"soft" | "hard"
 
     image: {
         registry: "c8n.io"
         repository: "dennybaa/webapp-playdemo"
     }
 
-    service: ports: {
-        http: 3000
+    containerPorts: http: 3000
+    service: ports: http: {
+        port: 3000
+        targetPort: "http"
     }
 
     ingress: {
         enabled: true
         // DRY value example (the default app hostname)
-        hostname: *"webapp-playdemo.\(cf.domains.default)" | string
+        hostname: *"webapp.\(cf.domains.default)" | string
     }
 
     resources: limits: resources.requests
     resources: requests: {
         cpu:    *"100m" | string
         memory: *"64Mi" | string
+    }
+
+    readinessProbe: {
+        enabled: true
+        httpGet: {
+            path: "/"
+            port: "http"
+        }
     }
 }

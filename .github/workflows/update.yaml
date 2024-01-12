@@ -27,7 +27,6 @@ jobs:
         with:
           files: |
             config/*/*.*
-            config/**/*.*
       - uses: cue-lang/setup-cue@v1.0.0
       -
         name: Build
@@ -35,10 +34,9 @@ jobs:
         env:
           CHANGED_APP_FILES: ${{ steps.changed-apps.outputs.all_changed_files }}
         run: |
-          ## get apps
-          echo -e "${CHANGED_APP_FILES// /$'\n'}" | sed -E s@${CONF_DIR%%/*}'/([^/]*).*@\1@' | uniq | while read app; do
-
-            ## update values
+          ## get apps (filter out app from paths config/{app}/...)
+          echo -e "${CHANGED_APP_FILES// /$'\n'}" | grep '^.*/.*/' | sed -En 's%^[^/]*/([^/]*)/.*%\1%; p' | uniq | \
+          while read app; do
             for stage in $STAGES; do
               cue cmd -t env=$stage -t app=$app update-values
             done

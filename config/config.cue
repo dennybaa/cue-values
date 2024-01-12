@@ -7,6 +7,5 @@ global: #Config
 #Env: "dev" | "prod"
 #Config: {
     domains:
-        default: *"\(env).kube.local" | string
-
+        default: *"\(env).k8s.local" | string
 }

@@ -3,8 +3,6 @@ package main
 import (
     "this.sh/config"
     "path"
-    // "strings"
-    // "encoding/yaml"
     "tool/exec"
     "tool/file"
     "tool/cli"
@@ -17,11 +15,7 @@ command: "update-values": {
 
     valuesDir: path.Resolve("values", app, path.Unix)
     versionFile: path.Join([valuesDir, "\(env).version.yaml"], path.Unix)
-
-    cueExport: [
-        "cue", "export", "--out=yaml", "-t", "\(env)",
-        "-t", "env=\(env)"
-    ]
+    cueExport: "cue export --out=yaml -t \(env) -t env=\(env)"
 
     // Create values/{app} directory
     mkDir: file.Mkdir & {
@@ -32,7 +26,7 @@ command: "update-values": {
     // Generate values via CUE
     genValues: exec.Run & {
         $dep: mkDir.$done
-        cmd: cueExport + ["-e", "Values"]
+        cmd: ["sh", "-c", "\(cueExport) -e Values"]
         dir: "config/\(app)"
         stdout: string
     }
@@ -52,7 +46,7 @@ command: "update-values": {
             }
 
             initVersion: exec.Run & {
-                cmd: cueExport + ["-e", "InitVersion"]
+                cmd: ["sh", "-c", "\(cueExport) -e InitVersion"]
                 dir: "config/\(app)"
                 stdout: string
             }
