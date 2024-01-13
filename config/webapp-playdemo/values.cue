@@ -30,8 +30,15 @@ Values: {
         minAvailable?: int & >0 | string
         maxUnavailable?: int & >0 | string
 
-        if minAvailable != _|_ && maxUnavailable != _|_ {
-            _fail: "minAvailable and maxUnavaliable are mutually exclusive" & _|_
+        if minAvailable != _|_ {
+            if minAvailable != "" && maxUnavailable != "" {
+                _fail: "minAvailable and maxUnavailable are mutually exclusive, set one to an empty string" & _|_
+            }
+        }
+        if maxUnavailable != _|_ {
+            if minAvailable != "" {
+                _fail: "minAvailable and maxUnavailable are mutually exclusive, set one to an empty string" & _|_
+            }
         }
     }
 

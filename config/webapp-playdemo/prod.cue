@@ -12,7 +12,7 @@ Values: {
     pdb: {
         create: true
         maxUnavailable: "20%"
-        // minAvailable: 2
+        minAvailable: ""
     }
 
     autoscaling: {
