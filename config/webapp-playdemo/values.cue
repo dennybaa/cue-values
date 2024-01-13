@@ -26,6 +26,15 @@ Values: {
         repository: "dennybaa/webapp-playdemo"
     }
 
+    pdb?: {
+        minAvailable?: int & >0 | string
+        maxUnavailable?: int & >0 | string
+
+        if minAvailable != _|_ && maxUnavailable != _|_ {
+            _fail: "minAvailable and maxUnavaliable are mutually exclusive" & _|_
+        }
+    }
+
     containerPorts: http: 3000
     service: ports: http: {
         port: 3000
