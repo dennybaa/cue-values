@@ -15,6 +15,7 @@ image:
 pdb:
   create: true
   maxUnavailable: 20%
+  minAvailable: ""
 containerPorts:
   http: 3000
 service:
