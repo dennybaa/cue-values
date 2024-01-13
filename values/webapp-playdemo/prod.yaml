@@ -9,13 +9,12 @@ resources:
     cpu: 100m
     memory: 128Mi
 podAntiAffinityPreset: soft
-pdb:
-  create: true
-  minAvailable: 2
-  maxUnavailable: 20%
 image:
   registry: c8n.io
   repository: dennybaa/webapp-playdemo
+pdb:
+  create: true
+  maxUnavailable: 20%
 containerPorts:
   http: 3000
 service:
