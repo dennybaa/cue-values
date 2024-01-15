@@ -7,7 +7,7 @@ Values: {
 
     // By way of illustration only, since we can't change it
     // for a single-node k3d cluster
-    podAntiAffinityPreset: "soft"
+    podAntiAffinityPreset: "spft"
 
     pdb: {
         create: true
